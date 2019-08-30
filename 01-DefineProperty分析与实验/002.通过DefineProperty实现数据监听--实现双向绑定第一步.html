@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>002.实现双向绑定第一步，通过Object.defineProperty实现数据监听</title>
+	<script>
+		// 定义方式相当于：enumerable与writeable为true，所以下面可以再定义然后做监听
+		let params = {
+			id: 1,
+			student: {
+				name: 'zhuchaoyang',
+				age: 20
+			}
+		};
+		obser(params);
+
+		function obser(params) {
+			if(!params || typeof params !== 'object') {
+				// 配置递归出口
+				return;
+			}
+			Object.keys(params).forEach(function(key) {
+			    defineProperty(params, key, params[key]);
+			});
+		}
+
+		function defineProperty(params,key,val) {
+			obser(val);
+			Object.defineProperty(params,key,{
+				 enumerable: true, 
+       			 configurable: false,
+       			 get: function() {
+       			 	return val;
+       			 },
+       			 set: function(newVal) {
+		            console.log('监听到值变化了 ', val, ' --> ', newVal);
+		            val = newVal;
+		        }
+			});
+		}
+
+		params.student.name = 'sunxianjing';	// 监听到了
+		
+
+
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
