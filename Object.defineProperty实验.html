@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>VUEJS数据绑定源码分析--基础预备</title>
+	<style type="text/css">
+		.center {
+			width: 50%;
+			margin: 0 auto;
+		}
+	</style>
+	<script type="text/javascript">
+		// ------------------------- Object.defineProperty数据描述符方式 value、writeable是其特有属性 ------------------------- 
+		let person = {};
+		Object.defineProperty(person,'name',{
+			value: 'Jack'
+		});
+		console.log(person.name);	// Jack
+
+		// 无法修改name属性
+		person.name = 'Rose';
+		console.log(person.name);	// Jack
+
+		// =====================================
+		let teacher = {};
+		Object.defineProperty(teacher,'name',{
+			value: 'Jack',
+			writable: true	// 是否可以修改
+		});
+		console.log(teacher.name);	// Jack
+
+		// 无法修改name属性
+		teacher.name = 'Rose';
+		console.log(teacher.name);	// Rose
+
+
+		// ----------------------- Object.defineProperty 存取描述符方式 set、get方法来存取数据------------------------
+		let data = {};
+		Object.defineProperty(data,'name',{
+			get: function() {
+				return name;
+			},
+			set: function(val) {
+				name = val;
+			}
+		})
+		data.name = 'Jreefy';
+		console.log(data.name);
+
+
+		// ---------------------- 数据描述符和存取描述均具有以下描述符  1、configrable 描述属性是否可以重新定义---------------------- 就是连续两次的Object.defineProperty同一个key，以及可否删除 2、enumerable 描述属性是否会出现在for in 或者 Object.keys()的遍历中  ----------
+		let data1 = {};
+		Object.defineProperty(data1,'gender',{
+			value: 'boy',
+			enumerable: true	// 当前对象可以再forin中迭代到
+		})
+		Object.defineProperty(data1,'age',{
+			value: 21,
+			enumerable: false	// 当前对象不可以再forin中迭代到
+		})
+		console.log(Object.keys(data1));	// ["gender"]
+// 注意以下两个对比
+		data1.name = 'Hanlen';
+		// 上面那句话等价于
+		// Object.defineProperty(data1,'name',{
+		// 	value: 'Hanlen',
+		// 	enumerable: true
+		//  writable: true
+		// })
+		console.log(Object.keys(data1));	// ["gender", "name"]
+
+// 注意以下两个对比
+		Object.defineProperty(data1,'class',{
+			value: '1522班级'
+		})
+		// 上面那句话等价于
+		// Object.defineProperty(data1,'name',{
+		// 	value: 'Hanlen',
+		//  configrable: false
+		// 	enumerable: false
+		//  writable: false
+		// })
+		console.log(Object.keys(data1));	// ["gender", "name"]
+
+
+
+		// --------------------------- 案例1：使用Object.defineProperty构造常量： 1、不可被重写；2、不可被删除；3、不可被重新定义---------------
+		let _const = {};
+		Object.defineProperty(_const,'SYSCONST',{
+			value: 'EXERPORTAL',
+			configrable: false,
+			writable: false
+		})
+		console.log(_const['SYSCONST']);	// EXERPORTAL
+		_const.SYSCONST = '_NEWONE';
+		console.log(_const['SYSCONST']);	// EXERPORTAL
+		// 当重新定义该属性时，报错：Object.defineProperty实验.html:89 Uncaught TypeError: Cannot redefine property: SYSCONST
+    	//							at Function.defineProperty (<anonymous>)
+    	//							at Object.defineProperty实验.html:89
+		// Object.defineProperty(_const,'SYSCONST',{
+		// 	value: 'SSSSS'
+		// })
+		// console.log(_const['SYSCONST']);	// 报错
+
+
+
+
+
+
+
+		// ------------ Object.preventExtensions()使用，静止对象扩展，但仍然可以修改原来的对象-----------------------------------------
+		// 效果：不可以扩展，
+		//      可以修改数据，重新定义Key
+		let _notExtend = {};
+		_notExtend.name = 'Frank';
+
+		Object.preventExtensions(_notExtend);
+		console.log(_notExtend.name);	// Frank
+
+		_notExtend.age = 28;
+		console.log(_notExtend.age);	// undefined
+
+		// Object.defineProperty(_notExtend,'gender',{
+		// 	value: 'boy'
+		// })
+		// console.log(_notExtend.gender);	// annot define property gender, object is not extensible
+
+		Object.defineProperty(_notExtend,'name',{
+			value: 'NEWNAME'
+		})
+		console.log(_notExtend.name);	// NEWNAME
+
+
+		// ----------- 密封：Object.seal()使用，是在Object.preventExtensions()的基础上添加了：configration:false ------------------------
+		// 效果：不可以扩展，
+		//      可以修改数据，不可以重新定义Key
+		let _seal = {};
+		Object.defineProperty(_seal,'name',{
+			value: 'Jack'
+		})
+		Object.seal(_seal);
+		console.log(_seal.name);	// Jack
+		// 下面就算是开了writable也不能重新定义
+		// Object.defineProperty(_seal,'name',{
+		// 	value: 'Rose',
+		// 	writable: true	
+		// })
+		// console.log(_seal.name);	// Jack
+
+
+
+
+		// ----------- 密封：Object.freeze()使用，是在Object.seal()的基础上添加了：writeable:false ------------------------
+		// 效果：不可以扩展，
+		// 		不可以修改，不可以重新定义
+		let _freeze = {};
+		Object.defineProperty(_freeze,'name',{
+			value: 'Rose'
+		});
+		Object.freeze(_freeze);
+		console.log(_freeze.name);	// Rose
+
+		_freeze.name = 'Jack';
+		console.log(_freeze.name);	// Rose
+
+
+
+	</script>
+</head>
+<body class='center'>
+	<h1>VUEJS数据绑定源码分析--基础预备</h1>
+	<h3>Configrable与Writeable的区别:</h3>
+	<code>
+		都是在Object.defineProperty中定义操作属性
+		<ul>
+			<li>1、configrable不可利用Object.defineProperty是否可以再定义一个已有属性覆盖掉以前的旧属性；</li>
+			<li>2、不可以使用deleteAPI来删除该属性</li>
+		</ul>
+		<pre>
+			let _test = {};
+			Object.defineProperty(_test,'Ban',{
+				value: 'xxx',
+				configrable: false,
+				writable: false // 默认为False
+			})
+			console.log(_test['Ban']);	// XXX
+			_test.Ban = 'newXXX'
+			console.log(_test['Ban']);	// xxx
+
+			Object.defineProperty(_test,'Ban',{
+				value: 'againProperty'
+			})
+			console.log(_test['Ban']);	// 且报错：已经被定义
+		</pre>
+		<b>※但这个地方有个需要注意的地方：当把writeable的默认值false修改为true的时候，发现对于configrable的不可再定义会失效</b>
+	</code>
+	<h3>Object不可变性的几个API</h3>
+	<code>
+		<ul>
+			<li>Object.preventExtensions()</li>
+			<li>Object.seal()</li>	
+			<li>Object.freeze()</li>	
+		</ul>
+		<pre>
+			1. Object.preventExtensions()是最原始的方案，为了解决对象不可扩展，只保留原先的信息。
+			<b>		         实现效果：不可扩展</b>
+			<b>				 可以修改</b>
+			<b>				 可以重新定义</b>
+			2. Object.seal()底层调用了Object.preventExtensions，所以，其不可扩展性，在此基础上添加了configrable:false属性
+			<b>		         实现效果：不可扩展</b>
+			<b>				 可以修改</b>
+			<b>				 不可以重新定义</b>
+			3. Object.freeze()底层调用了Object.seal，在此基础上添加了writeable:false属性
+			<b>		         实现效果：不可扩展</b>
+			<b>				 不可以修改</b>
+			<b>				 不可以重新定义</b>
+		</pre>
+	</code>
+</body>
+</html>
