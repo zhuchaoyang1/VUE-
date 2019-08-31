@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>001.普通函数的This指向</title>
+	<style>
+		body {
+			width: 50%;	
+			margin: 0 auto;
+			padding-bottom: 50px;
+		}
+		pre {
+			font-weight: 700;
+			padding: 20px;
+			box-sizing: border-box;
+			overflow: auto;
+			background-color: #eee;
+			border: 1px solid #eee;
+		}
+	</style>
+	<script>
+
+		//普通函数的this指向
+		function testa() {
+			console.log(this);					// 指向Window
+		}
+
+		// 测试闭包函数中的this指向
+		function testb() {
+			console.log(this);					// 指向Window
+			function testInnter() {
+				console.log(this);				// 指向Window
+			}
+			testInnter();
+		}
+
+		// 测试JSON中普通函数的This指向
+		let json = {
+			name: this,							// 指向Window
+			funInJson() {
+				console.log(this);				// 指向Json本身
+			}
+		}
+
+		//　现在测试，将上述的json放在新的Json当中（换一个执行环境），查看funInJson函数中的This指向
+		let _newJson = {
+			funInJson : json.funInJson
+		}
+		_newJson.funInJson();					// 打印出来的This指向了JSON:_newJson
+		
+
+
+		// 测试JSON中箭头函数的This指向
+		let _new = {
+			funInJson: ()=> {
+				console.log(this);				// 指向Window
+			}
+		}
+
+		let _arrayJson = {
+			funInNewJson: _new.funInJson 		// 执行_new
+		}
+		_arrayJson.funInNewJson();				// 指向Window
+
+
+		testa();		
+
+		testb();		
+
+		console.log(json.name);		
+
+		json.funInJson();
+
+		_new.funInJson();
+
+
+
+		function call() {
+			setTimeout(()=>{
+				console.log(this);			// 指向Window
+			},2000);
+		}
+		call();
+
+		function call2() {
+			setTimeout(function (){
+				console.log(this);			// 指向Window
+			},3000);
+		}
+		call2();
+
+		// 现在把匿名函数换一个执行环境    发现下面都是指向windows
+		let _ni = {
+			testNiming: call2
+		}
+		function testNiming() {
+			call2();
+		}
+		testNiming();
+		_ni.testNiming();
+
+	</script>
+</head>
+<body>
+	<h1>This指向问题</h1>
+	<h2>
+		普通函数的This指向：
+	</h2>
+	<p>
+		谁定义的该函数，那么This就指向谁，如果执行环境变了，那么This会重新指向执行环境的This，那么也就是说，This的指向会跟随着定义环境的不同而不同。
+	</p>
+	<pre>
+		//普通函数的this指向
+		function testa() {
+			console.log(this);					// 指向Window
+		}
+
+		// 测试闭包函数中的this指向
+		function testb() {
+			console.log(this);					// 指向Window
+			function testInnter() {
+				console.log(this);				// 指向Window
+			}
+			testInnter();
+		}
+
+		// 测试JSON中普通函数的This指向
+		let json = {
+			name: this,							// 指向Window
+			funInJson() {
+				console.log(this);				// 指向Json本身
+			}
+		}
+
+		//　现在测试，将上述的json放在新的Json当中，查看funInJson函数中的This指向
+		let _newJson = {
+			funInJson : json.funInJson
+		}
+		_newJson.funInJson();					// 打印出来的This指向了JSON:_newJson
+	</pre>
+
+
+	<h2>箭头函数的This指向</h2>
+	<p>
+		箭头函数的This指向定义者，就算是执行环境变了，也不会跟随移动
+	</p>
+	<pre>
+		// 测试JSON中箭头函数的This指向
+		let _new = {
+			funInJson: ()=> {
+				console.log(this);				// 指向Window
+			}
+		}
+
+		let _arrayJson = {
+			funInNewJson: _new.funInJson 		// 执行_new
+		}
+		_arrayJson.funInNewJson();				// 指向Window
+	</pre>
+	<p>
+		可能会有疑惑：<br>
+		为什么下面的代码this指向了window呢？不是说，箭头函数在哪里定义this就指向谁的吗？
+		确实是这个道理，但是要考虑一个问题就是：全局变量以及函数的定义都是在window对象中的，
+		而箭头函数的this不会跟随着运行环境的不同而切换，所以，这里箭头函数的this指向，指向了
+		window中。
+		<pre>
+			let _new = {
+			funInJson: ()=> {
+				console.log(this);				// 指向Window
+			}
+		}
+		</pre>
+	</p>
+
+
+	<h2>匿名函数的This指向</h2>
+	<pre>
+		function call() {
+			setTimeout(()=>{
+				console.log(this);			// 指向Window
+			},2000);
+		}
+		call();
+
+		function call2() {
+			setTimeout(function (){
+				console.log(this);			// 指向Window
+			},3000);
+		}
+		call2();
+	</pre>
+
+	<p>
+		最后总结：
+		不管是什么函数（普通函数、箭头函数、匿名函数）他们在定义的时候，其实都是属于window原型上的，但是，普通函数的this会变（变化与当前运行的对象有关）而已。而匿名函数（闭包函数属于匿名函数）和箭头函数的this几乎不会变化，匿名函数永远是属于 windows的，因为匿名函数都是window来执行的，而箭头函数永远属于定义者的也不会发生变化。
+	</p>
+	<p>
+		在很多时候，我们需要改变某个函数执行时的this指向，这个时候有两种方法：
+		<ul>
+			<li>使用call() -- 详细信息查看第六课 《06-Js call》</li>
+			<li>将外部的this传递进来</li>
+		</ul>
+	</p>
+</body>
+</html>

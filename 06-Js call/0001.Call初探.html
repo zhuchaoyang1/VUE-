@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>001.Call方法初探</title>
+	<script>
+		var name = 'zhuchaoyang';	// 需要注意的是，使用var定义的全局变量才会挂在在windows身上 而let不可以
+		let obj = {
+			name: 'new',
+			fun: function() {					// 这是Object中的函数
+				return function() {				// 这是闭包函数
+					return this.name;			// zhuchaoyang  因为闭包函数属于匿名函数，匿名函数的默认指向window
+				}
+			}
+		}
+		console.log(this.name);					// zhuchaoyang
+
+		console.log(obj.fun()());				// zhuchaoyang
+
+
+
+		// 现在开始修改闭包函数的this执行，windows -->  obj
+		console.log(obj.fun().call(obj));
+
+	</script>
+</head>
+<body>
+	<h1>Call</h1>
+	<pre>
+	var name = 'zhuchaoyang';	// 需要注意的是，使用var定义的全局变量才会挂在在windows身上 而let不可以
+		let obj = {
+			name: 'new',
+			fun: function() {					// 这是Object中的函数
+				return function() {				// 这是闭包函数
+					return this.name;			// zhuchaoyang  因为闭包函数属于匿名函数，匿名函数的默认指向window
+				}
+			}
+		}
+		console.log(this.name);					// zhuchaoyang
+
+		console.log(obj.fun()());				// zhuchaoyang
+
+
+
+		// 现在开始修改闭包函数的this执行，windows -->  obj
+		console.log(obj.fun().call(obj)); 
+	</pre>
+	<p>
+		call函数的作用，改变需要call的方法this指向，指向了参数。
+	</p>
+</body>
+</html>
