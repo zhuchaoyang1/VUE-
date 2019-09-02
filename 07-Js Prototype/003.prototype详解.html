@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>003.Prototype详解</title>
+	<script type="text/javascript">
+		let fun = function(x) {
+			this.x = x;		// this指向调用者，所有x会被挂载在调用者身上
+		}
+
+		fun.prototype.caculate = function(y) {
+			return this.x + y;
+		}
+
+
+		let _funA = new fun(20);				// 经过实例化之后就不是Function而是Object
+		console.log(_funA.caculate(30));
+
+		//--------------------------------------------查看new关键词 && prototype的作用-----------------------------------
+		// 官方解释：prototype的作用是在实例化函数成对象的时候，对象的__proto__指向的是函数的prototype，从而实现了实例对象的功能
+		console.log(_funA.__proto__ === fun.prototype);			// true
+
+
+
+
+	</script>
+</head>
+<body>
+	<h1>Prototype</h1>
+	<h2>Prototype是什么？Prototype存在于Object还是Function</h2>
+	<pre>
+	Prototype是函数所具有的，
+	证明如下：
+		1.先看Object对象的prototype和__proto__打印：
+		let json = {
+
+		}
+		console.log(json.prototype);		// undefined
+		console.log(json.__proto__)			// No undefined
+
+
+		2.再看Function的prototype和__proto__打印：
+		let fun = function(x) {
+			this.x = x;		// this指向调用者，所有x会被挂载在调用者身上
+		}
+		console.log(fun.prototype);			// No undefined
+		console.log(fun.__proto__);			// No undefined
+	</pre>
+	<h2>Prototype的作用是什么？</h2>
+	<pre>
+	用于函数的实例化作用：
+	prototype的作用是在实例化函数成对象的时候，对象的__proto__指向的是函数的prototype，从而实现了实例对象的功能
+	console.log(_funA.__proto__ === fun.prototype);			// true
+	</pre>
+
+</body>
+</html>

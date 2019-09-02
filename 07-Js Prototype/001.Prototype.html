@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>001. Js 原型链</title>
+	<script type="text/javascript">
+		let M = function(name) {
+			this.name = name;
+		}
+
+		// 创建M对象obj
+		let obj1 = new M('zhuchaoyang');
+		console.log(obj1);
+
+		// 创建M对象obj2
+		let obj2 = new M('sunxianjing');
+		console.log(obj2);
+
+		console.log(obj1)
+		// 原型上挂载公用方法
+		obj2.__proto__.say = function() {
+			console.log('hi');
+		}
+
+		obj2.__proto__.say();
+
+	</script>
+</head>
+<body>
+	<h1>原型链第一课基础</h1>
+	<p>
+		函数具有__proto__原型链和prototype原型链
+		通过new关键词可以创建构造函数的实力。
+	</p>
+	<p>
+		那么JS是通过什么去继承呢，实质上是改变一个对象或者是实例的__proto__或者prototype属性去指向父类，这样就可以实现一个继承，当然继承方式和Java等语言方式不一样。
+		<br>
+		通过挂载原型的方式就可以形成一条原型链了。
+	</p>
+</body>
+</html>
