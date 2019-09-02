@@ -4,11 +4,41 @@
 	<meta charset="UTF-8">
 	<title>001.JavaScript闭包</title>
 	<script>
-		
-		
+		// 基本概念
+		function out() {
+			let name = "zhuchaoyang";
+			function inner() {
+				console.log(name);
+			}
+			return inner;
+		}
+		out()();		// zhuchaoyang
+
+
+		// 坑点1：
+		function outer() {
+      		var result = [];
+      		for (let i = 0; i < 10; i++) {
+        		result[i] = function () {
+	            	console.info(i);
+        		}
+     		}
+     		return result;
+		};
+
+		let result = outer();
+		for(let i=0; i<10; i++) {
+			result[i]();
+		}
+
+
+
 	</script>
 </head>
 <body>
-	
+	<p>
+		推荐课程：
+		https://www.bilibili.com/video/av42121576?from=search&seid=14673879450533678967
+	</p>
 </body>
 </html>
